@@ -25,14 +25,7 @@ service /address on new http:Listener(9090) {
     # A resource for getting the address of a person
     # + return - Address or error
     resource function get getAddressByNIC(string nic) returns json|error {
-        if (nic == "") {
-            return error("NIC cannot be empty");
-        }
-
-        if (nic.length() < 10 || nic.length() > 12) {
-            return error("Invalid NIC");
-        }
-
+        _ = check validateNIC(nic);
         stream<Address, error?>|mongodb:Error AddressStream = check self.databaseClient->find(collection, database, {nic: nic});
         Address[]|error addresses = from Address address in check AddressStream
             select address;
